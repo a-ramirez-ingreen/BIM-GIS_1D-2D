@@ -38,39 +38,41 @@ uploaded_file = st.sidebar.file_uploader("Selecciona un archivo IFC", type=["ifc
 # Inicializar session state para datos persistentes
 if "ifc_model" not in st.session_state:
     st.session_state.ifc_model = None
-
 if "geojson_data" not in st.session_state:
     st.session_state.geojson_data = None
-
 if "selected_props" not in st.session_state:
     st.session_state.selected_props = []
-
 if "entity_choices" not in st.session_state:
     st.session_state.entity_choices = []
-
 if "all_props" not in st.session_state:
     st.session_state.all_props = []
-
 if "available_prop_keys" not in st.session_state:
     st.session_state.available_prop_keys = []
+if "crs_input" not in st.session_state:
+    st.session_state.crs_input = "EPSG:25830 → EPSG:4326"
 
-# Paso 1: Descripción de ubicación y sugerencia por IA
+# Paso 1: Georreferenciación y sugerencia IA
 st.sidebar.header("🌍 Georreferenciación del proyecto")
-crs_input = st.sidebar.text_input("✍️ Introduce el sistema CRS manual (opcional)", value="EPSG:25830 → EPSG:4326")
+st.session_state.crs_input = st.sidebar.text_input(
+    "✍️ Introduce el sistema CRS manual (opcional)",
+    value=st.session_state.crs_input,
+    key="crs_input_key"
+)
+
 ubicacion_texto = st.sidebar.text_input("📍 Describe la ubicación del proyecto (para sugerencia IA)", value="")
 
 if st.sidebar.button("🔎 Sugerir CRS con Gemini") and ubicacion_texto:
     with st.spinner("Consultando IA..."):
         try:
             sugerido = sugerir_epsg(ubicacion_texto)
-            crs_input = sugerido + " → EPSG:4326"
+            st.session_state.crs_input = f"{sugerido} → EPSG:4326"
             st.sidebar.success(f"CRS sugerido: {sugerido}")
         except Exception as e:
             st.sidebar.error(f"No se pudo obtener sugerencia de IA: {e}")
 
 # Configurar transformación CRS
 try:
-    from_crs, to_crs = [s.strip() for s in crs_input.split("→")]
+    from_crs, to_crs = [s.strip() for s in st.session_state.crs_input.split("→")]
     transformer = Transformer.from_crs(from_crs, to_crs, always_xy=True)
     bimgeo.set_transformer(transformer)
     st.sidebar.info(f"CRS en uso: {from_crs} → {to_crs}")
@@ -202,7 +204,7 @@ if st.session_state.geojson_data:
             components.html(f.read().decode("utf-8"), height=800)
 
     st.download_button(
-        "📥 Descargar GeoJSON",
+        "📅 Descargar GeoJSON",
         data=json.dumps(st.session_state.geojson_data, indent=2),
         file_name="ifc_to_geojson_2d.geojson",
         mime="application/geo+json"
