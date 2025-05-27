@@ -12,6 +12,12 @@ from pyproj import Transformer
 from Tools import bim_ifc_to_geojson_2d as bimgeo
 from gemini_assistant import sugerir_epsg
 
+# Botón superior para reiniciar la sesión
+if st.button("🔄 Reiniciar aplicación"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.experimental_rerun()
+
 # Estilos personalizados para botones
 st.markdown("""
     <style>
