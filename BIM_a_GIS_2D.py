@@ -11,14 +11,11 @@ import json
 from pyproj import Transformer
 from Tools import bim_ifc_to_geojson_2d as bimgeo
 from gemini_assistant import sugerir_epsg
-import streamlit.runtime.scriptrunner.script_run_context as context
 
-# Botón para reiniciar aplicación: redirige a sí misma (simula recarga)
+# Botón para reiniciar aplicación: usa un formulario HTML para recarga
 st.markdown("""
     <div style='display: flex; justify-content: flex-end;'>
-        <form action="" method="get">
-            <button style='padding: 0.5em 1em; border-radius: 6px; border: 1px solid #ccc; background-color: #f44336; color: white;'>🔁 Reiniciar aplicación</button>
-        </form>
+        <form><input type='submit' value='🔁 Reiniciar aplicación' style='padding: 0.5em 1em; border-radius: 6px; border: 1px solid #ccc; background-color: #f44336; color: white;'></form>
     </div>
 """, unsafe_allow_html=True)
 
